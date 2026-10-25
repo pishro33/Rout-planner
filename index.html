@@ -24,9 +24,9 @@ button{border:0;border-radius:11px;padding:11px 13px;font:inherit;font-weight:65
 <div class="row" style="margin-top:9px"><button id="addFixed" style="flex:1">افزودن دو توقف ثابت به ابتدای مسیر</button></div>
 <p class="muted">این دو آدرس قبل از توقف‌های دیگر قرار می‌گیرند. اگر از قبل در مسیر باشند، تکراری نمی‌شوند.</p>
 <hr class="hr"><h2>۴. مقصد پایان مسیر</h2><label class="muted" for="endDestination">بعد از آخرین تحویل کجا بروم؟</label><select id="endDestination"><option value="home">خانه</option><option value="depot">انبار (آدرس شروع)</option></select><div style="height:9px"></div><button id="endNav" class="secondary" style="width:100%">مسیریابی به مقصد نهایی</button><p class="muted">برای مقصد انبار، آدرس بخش «آدرس شروع» استفاده می‌شود.</p>
-<hr class="hr"><h2>۵. نقشه</h2><label class="muted" for="mapapp">اپ مسیریابی</label><select id="mapapp"><option value="google">Google Maps</option><option value="waze">Waze</option><option value="apple">Apple Maps</option></select><div style="height:9px"></div><button id="nextNav" style="width:100%">مسیریابی به اولین توقف باقی‌مانده</button><p class="muted">برای اطمینان، این نسخه هر توقف را جداگانه در نقشه باز می‌کند؛ ترتیب خودکار جاده‌ای هنوز فعال نیست.</p></section>
+<hr class="hr"><h2>۵. بهینه‌سازی مسیر</h2><button id="optimize" style="width:100%">بهینه‌سازی خودکار ترتیب توقف‌ها</button><p id="optStatus" class="muted" role="status">با استفاده از مسیرهای جاده‌ای OpenStreetMap، ترتیب بهتر توقف‌های تحویل محاسبه می‌شود.</p><p class="muted">برای آدرس‌های ثابت A و B، ترتیب انتخابی حفظ می‌شود و فقط توقف‌های بعد از آن‌ها مرتب می‌شوند.</p><hr class="hr"><h2>۶. نقشه</h2><label class="muted" for="mapapp">اپ مسیریابی</label><select id="mapapp"><option value="google">Google Maps</option><option value="waze">Waze</option><option value="apple">Apple Maps</option></select><div style="height:9px"></div><button id="nextNav" style="width:100%">مسیریابی به اولین توقف باقی‌مانده</button><p class="muted">هر توقف را جداگانه در نقشه باز کن؛ بهینه‌سازی فقط ترتیب توقف‌ها را پیشنهاد می‌دهد و مسیریابی نهایی در اپ انتخابی انجام می‌شود.</p></section>
 </div>
-<section class="card"><div class="spread"><h2 style="margin:0">۶. توقف‌های مسیر</h2><span class="pill" id="countLabel">0 توقف</span></div><p class="muted">با فلش‌ها ترتیب توقف‌ها را تغییر بده. تغییرات به‌طور خودکار ذخیره می‌شوند.</p><div id="list" class="empty">هنوز آدرسی وارد نشده است.</div><div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="secondary" id="copy">کپی فهرست</button><button class="secondary" id="export">خروجی پشتیبان</button><label class="secondary" style="padding:11px 13px;border-radius:11px;font-weight:650;cursor:pointer">بازیابی پشتیبان<input id="importFile" type="file" accept=".json,application/json" class="hidden"></label><button class="danger" id="clear">پاک کردن توقف‌های مسیر فعلی</button></div></section>
+<section class="card"><div class="spread"><h2 style="margin:0">۷. توقف‌های مسیر</h2><span class="pill" id="countLabel">0 توقف</span></div><p class="muted">با فلش‌ها ترتیب توقف‌ها را تغییر بده. تغییرات به‌طور خودکار ذخیره می‌شوند.</p><div id="list" class="empty">هنوز آدرسی وارد نشده است.</div><div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="secondary" id="copy">کپی فهرست</button><button class="secondary" id="export">خروجی پشتیبان</button><label class="secondary" style="padding:11px 13px;border-radius:11px;font-weight:650;cursor:pointer">بازیابی پشتیبان<input id="importFile" type="file" accept=".json,application/json" class="hidden"></label><button class="danger" id="clear">پاک کردن توقف‌های مسیر فعلی</button></div></section>
 <p class="footer">حریم خصوصی: داده‌ها در حافظه محلی مرورگر همین دستگاه ذخیره می‌شوند و به سرور ارسال نمی‌شوند. پاک کردن داده‌های مرورگر ممکن است آن‌ها را حذف کند؛ هر چند وقت یک‌بار از «خروجی پشتیبان» استفاده کن. همیشه قبل از حرکت مسیر را تنظیم کن و هنگام رانندگی با گوشی کار نکن.</p>
 </main>
 <script>
@@ -47,6 +47,59 @@ actions.append(btn('مسیریابی',()=>navigate(address)),btn('↑',()=>move(
 function move(i,d){let j=i+d;if(j<0||j>=stops.length)return;[stops[i],stops[j]]=[stops[j],stops[i]];done=done.map(n=>n===i?j:n===j?i:n);render()}
 function edit(i){let v=prompt('آدرس را ویرایش کن:',stops[i]);if(v&&v.trim()){stops[i]=v.trim();render()}}
 function navigate(address){if(!address||!address.trim()){alert('آدرس مقصد مشخص نیست.');return}let q=encodeURIComponent(address);let url=$('mapapp').value==='waze'?'https://waze.com/ul?q='+q+'&navigate=yes':$('mapapp').value==='apple'?'https://maps.apple.com/?daddr='+q:'https://www.google.com/maps/dir/?api=1&destination='+q+'&travelmode=driving';window.open(url,'_blank')}
+const GEO_KEY='myCourierGeoCacheV1';
+function readGeoCache(){try{return JSON.parse(localStorage.getItem(GEO_KEY)||'{}')}catch(e){return {}}}
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+let lastGeocodeRequest=0;
+async function geocodeAddress(address,cache){
+  const key=address.trim().toLowerCase();if(cache[key])return cache[key];
+  const wait=Math.max(0,1100-(Date.now()-lastGeocodeRequest));if(wait)await sleep(wait);lastGeocodeRequest=Date.now();
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=it&accept-language=it&q='+encodeURIComponent(address);
+  const res=await fetch(url,{headers:{'Accept':'application/json'}});if(!res.ok)throw Error('سرویس تبدیل آدرس به مختصات پاسخ نداد.');
+  const data=await res.json();if(!data.length)throw Error('این آدرس پیدا نشد: '+address+'\nآدرس را با نام خیابان، شماره و شهر دقیق‌تر وارد کن.');
+  const point={lat:Number(data[0].lat),lon:Number(data[0].lon)};cache[key]=point;localStorage.setItem(GEO_KEY,JSON.stringify(cache));return point;
+}
+async function optimizeRoute(){
+  if(stops.length<3){alert('برای بهینه‌سازی، حداقل ۳ توقف لازم است.');return}
+  if(done.length){alert('برای جلوگیری از تغییر شماره توقف‌های تحویل‌شده، بهینه‌سازی را قبل از شروع تحویل‌ها انجام بده.');return}
+  const button=$('optimize');button.disabled=true;button.textContent='در حال محاسبه…';
+  const status=$('optStatus');status.textContent='در حال پیدا کردن مختصات آدرس‌ها؛ برای آدرس‌های جدید ممکن است کمی طول بکشد…';
+  try{
+    const fixed=[FIXED_A,FIXED_B];
+    const prefix=stops.length>=2&&stops[0]===fixed[0]&&stops[1]===fixed[1]?[...stops.slice(0,2)]:stops.length>=2&&stops[0]===fixed[1]&&stops[1]===fixed[0]?[...stops.slice(0,2)]:[];
+    if(!prefix.length){alert('اول دکمه «افزودن دو توقف ثابت به ابتدای مسیر» را بزن تا ترتیب A و B حفظ شود.');return}
+    const remaining=stops.filter((s,i)=>!done.includes(i)&&!prefix.includes(s));
+    const completed=stops.filter((s,i)=>done.includes(i));
+    if(remaining.length<2){status.textContent='توقف‌های باقی‌مانده کافی نیستند؛ حداقل دو توقف انجام‌نشده بعد از توقف‌های ثابت لازم است.';return}
+    const cache=readGeoCache();let coords=[],tripStops=[];
+    if(prefix.length){
+      const anchor=prefix[prefix.length-1];
+      await geocodeAddress(anchor,cache);coords.push(cache[anchor.trim().toLowerCase()]);tripStops=[...remaining];
+    }else if(start.trim()){
+      await geocodeAddress(start.trim(),cache);coords.push(cache[start.trim().toLowerCase()]);tripStops=[...remaining];
+    }else{
+      tripStops=[...remaining];
+    }
+    for(let i=0;i<tripStops.length;i++){
+      const a=tripStops[i];if(!cache[a.trim().toLowerCase()])await geocodeAddress(a,cache)
+      coords.push(cache[a.trim().toLowerCase()]);
+    }
+    if(coords.length<3){status.textContent='برای محاسبه مسیر، مختصات کافی نیست.';return}
+    status.textContent='در حال محاسبه ترتیب رانندگی…';
+    const coordString=coords.map(c=>c.lon+','+c.lat).join(';');
+    let params='overview=false&steps=false&roundtrip=false&source='+(prefix.length||start.trim()?'first':'any')+'&destination=any';
+    const response=await fetch('https://router.project-osrm.org/trip/v1/driving/'+coordString+'?'+params);
+    if(!response.ok)throw Error('سرویس بهینه‌سازی موقتاً در دسترس نیست.');
+    const result=await response.json();if(result.code!=='Ok'||!Array.isArray(result.waypoints))throw Error('برای این آدرس‌ها مسیر جاده‌ای پیدا نشد.');
+    // If a start/anchor coordinate was added separately, skip it when mapping stops.
+    const offset=(prefix.length||start.trim())?1:0;
+    const sorted=result.waypoints.slice(offset).map((w,i)=>({index:w.waypoint_index,address:tripStops[i]})).sort((a,b)=>a.index-b.index).map(x=>x.address);
+    stops=prefix.length?[...prefix,...sorted]:sorted;
+    done=[];
+    render();status.textContent='ترتیب توقف‌ها به‌روزرسانی شد. بررسی کن که آدرس‌ها درست تشخیص داده شده باشند؛ این نتیجه بهترین مسیر تضمین‌شده نیست.';
+  }catch(err){status.textContent='بهینه‌سازی انجام نشد: '+(err&&err.message?err.message:'خطای ناشناخته');alert('بهینه‌سازی انجام نشد.\n'+(err&&err.message?err.message:'لطفاً دوباره تلاش کن.'))}
+  finally{button.disabled=false;button.textContent='بهینه‌سازی خودکار ترتیب توقف‌ها'}
+}
 $('add').onclick=()=>{let a=$('addresses').value.split(/\n/).map(x=>x.trim()).filter(Boolean);if(!a.length){alert('اول حداقل یک آدرس وارد کن.');return}stops.push(...a);$('addresses').value='';render()};
 $('save').onclick=()=>saveCurrent(false);$('load').onclick=()=>{if(!$('saved').value)return alert('یک مسیر انتخاب کن.');restoreRoute($('saved').value)};$('deleteRoute').onclick=()=>{let id=$('saved').value;if(!id)return alert('یک مسیر انتخاب کن.');if(confirm('این مسیر ذخیره‌شده حذف شود؟')){delete routes[id];persist();if(id===currentId){currentId=null;stops=[];done=[];routeName='';start='';$('routeName').value='';$('start').value='';render()}refreshSaved()}};
 $('nextNav').onclick=()=>{let i=stops.findIndex((_,i)=>!done.includes(i));if(i<0)return alert('همه توقف‌ها تحویل شده‌اند.');navigate(stops[i])};
@@ -65,6 +118,7 @@ $('endNav').onclick=()=>{
   if(!destination)return alert('برای مقصد انبار، اول آدرس انبار را در «آدرس شروع» وارد کن.');
   navigate(destination);
 };
+$('optimize').onclick=optimizeRoute;
 $('clear').onclick=()=>{if(confirm('همه توقف‌های مسیر فعلی پاک شوند؟')){stops=[];done=[];render()}};
 $('copy').onclick=async()=>{let text=stops.map((s,i)=>(done.includes(i)?'✓ ':'○ ')+(i+1)+'. '+s).join('\n');try{await navigator.clipboard.writeText(text);alert('فهرست کپی شد.')}catch(e){prompt('این فهرست را کپی کن:',text)}};
 $('export').onclick=()=>{let blob=new Blob([JSON.stringify({routes,currentId},null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-courier-routes-backup.json';a.click();URL.revokeObjectURL(a.href)};
